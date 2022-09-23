@@ -20,7 +20,7 @@ COPY . .
 
 WORKDIR /grpc-java/interop-testing
 
-RUN ../gradlew installDist -x test -PskipAndroid=true
+RUN ../gradlew installDist -x test -PskipCodegen=true -PskipAndroid=true
 
 WORKDIR /grpc-java
 
