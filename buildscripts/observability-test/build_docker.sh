@@ -26,4 +26,5 @@ docker build --no-cache -t o11y/${IMAGENAME}:${TAG} -f ./buildscripts/observabil
 
 docker tag o11y/${IMAGENAME}:${TAG} gcr.io/${PROJECTID}/${IMAGENAME}:${TAG}
 
+gcloud auth list
 docker push gcr.io/${PROJECTID}/${IMAGENAME}:${TAG}
