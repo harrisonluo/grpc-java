@@ -76,7 +76,7 @@ public class ObservabilityTestClient {
       target = args[0];
     }
 
-    GcpObservability.grpcInit();
+    GcpObservability observability = GcpObservability.grpcInit();
 
     // Create a communication channel to the server, known as a Channel. Channels are thread-safe
     // and reusable. It is common to create channels at the beginning of your application and reuse
@@ -95,5 +95,8 @@ public class ObservabilityTestClient {
       // again leave it running.
       channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
     }
+    // call close() on the observability instance to shutdown observability
+    logger.info("calling observability.close()");
+    observability.close();
   }
 }
