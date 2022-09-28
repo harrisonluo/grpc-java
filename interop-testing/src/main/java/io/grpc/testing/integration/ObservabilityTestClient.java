@@ -97,6 +97,7 @@ public class ObservabilityTestClient {
     }
     // call close() on the observability instance to shutdown observability
     logger.info("calling observability.close()");
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(40, TimeUnit.SECONDS));
     observability.close();
   }
 }
