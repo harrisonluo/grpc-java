@@ -65,15 +65,20 @@ public class ObservabilityTestClient {
   public static void main(String[] args) throws Exception {
     // Access a service running on the local machine on port 10000
     String target = "localhost:10000";
+    int exportInterval = 0;
     // Allow passing in the user and target strings as command line arguments
     if (args.length > 0) {
       if ("--help".equals(args[0])) {
-        System.err.println("Usage: [target]");
+        System.err.println("Usage: [target [exportInterval]]");
         System.err.println("");
         System.err.println("  target  The server to connect to. Defaults to " + target);
+        System.err.println("  exportInterval  Number of seconds to wait for exporting observability data. Defaults to " + exportInterval);
         System.exit(1);
       }
       target = args[0];
+      if (args.length > 1) {
+        exportInterval = Integer.parseInt(args[1]);
+      }
     }
 
     GcpObservability observability = GcpObservability.grpcInit();
@@ -97,7 +102,7 @@ public class ObservabilityTestClient {
     }
     // call close() on the observability instance to shutdown observability
     logger.info("calling observability.close()");
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(60, TimeUnit.SECONDS));
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(exportInterval, TimeUnit.SECONDS));
     observability.close();
   }
 }
