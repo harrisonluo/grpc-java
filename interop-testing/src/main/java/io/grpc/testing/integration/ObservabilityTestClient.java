@@ -102,7 +102,13 @@ public class ObservabilityTestClient {
     }
     // call close() on the observability instance to shutdown observability
     logger.info("calling observability.close() after "+exportInterval+"s sleep");
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(exportInterval, TimeUnit.SECONDS));
+    int ss = exportInterval;
+    while (ss > 0) {
+      int next = Math.min(ss, 5);
+      Thread.sleep(TimeUnit.MILLISECONDS.convert(next, TimeUnit.SECONDS));
+      ss = ss - next;
+      logger.info(ss+"s more to sleep");
+    }
     observability.close();
   }
 }
