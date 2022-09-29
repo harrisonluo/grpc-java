@@ -101,7 +101,7 @@ public class ObservabilityTestClient {
       channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
     }
     // call close() on the observability instance to shutdown observability
-    logger.info("calling observability.close()");
+    logger.info("calling observability.close() after "+exportInterval+"s sleep");
     Thread.sleep(TimeUnit.MILLISECONDS.convert(exportInterval, TimeUnit.SECONDS));
     observability.close();
   }
