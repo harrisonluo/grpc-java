@@ -25,8 +25,11 @@ import io.grpc.ServerBuilder;
 import io.grpc.gcp.observability.GcpObservability;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.integration.Messages.Payload;
+import io.grpc.testing.integration.Messages.ResponseParameters;
 import io.grpc.testing.integration.Messages.SimpleRequest;
 import io.grpc.testing.integration.Messages.SimpleResponse;
+import io.grpc.testing.integration.Messages.StreamingOutputCallRequest;
+import io.grpc.testing.integration.Messages.StreamingOutputCallResponse;
 
 /**
  * Server that manages startup/shutdown of a {@code TestService} server.
@@ -96,12 +99,37 @@ public class ObservabilityTestServer {
 
     @Override
     public void unaryCall(SimpleRequest req, StreamObserver<SimpleResponse> responseObserver) {
-      logger.info("Here on server respondning to unaryCall");
+      logger.info("unaryCall server receives request size "+req.getPayload().getBody().size());
       responseObserver.onNext(
           SimpleResponse.newBuilder().setPayload(
               Payload.newBuilder().setBody(
                   ByteString.copyFrom(new byte[req.getResponseSize()]))).build());
       responseObserver.onCompleted();
+    }
+
+    @Override
+    public StreamObserver<StreamingOutputCallRequest> fullDuplexCall(
+        final StreamObserver<StreamingOutputCallResponse> responseObserver) {
+      return new StreamObserver<StreamingOutputCallRequest>() {
+        @Override
+        public void onNext(StreamingOutputCallRequest req) {
+          logger.info("fullDuplexCall server receives request size "+req.getPayload().getBody().size());
+          for (ResponseParameters params : req.getResponseParametersList()) {
+            responseObserver.onNext(StreamingOutputCallResponse.newBuilder().setPayload(
+                Payload.newBuilder().setBody(
+                    ByteString.copyFrom(new byte[params.getSize()]))).build());
+          }
+        }
+        @Override
+        public void onError(Throwable t) {
+          logger.info("fullDuplexCall server onError");
+          responseObserver.onError(t);
+        }
+        @Override
+        public void onCompleted() {
+          responseObserver.onCompleted();
+        }
+      };
     }
   }
 }

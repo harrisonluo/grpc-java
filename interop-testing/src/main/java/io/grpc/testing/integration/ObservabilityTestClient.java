@@ -16,6 +16,7 @@
 
 package io.grpc.testing.integration;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,9 +26,13 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.gcp.observability.GcpObservability;
+import io.grpc.stub.StreamObserver;
 import io.grpc.testing.integration.Messages.Payload;
+import io.grpc.testing.integration.Messages.ResponseParameters;
 import io.grpc.testing.integration.Messages.SimpleRequest;
 import io.grpc.testing.integration.Messages.SimpleResponse;
+import io.grpc.testing.integration.Messages.StreamingOutputCallRequest;
+import io.grpc.testing.integration.Messages.StreamingOutputCallResponse;
 
 /**
  * The Observability integration testing client
@@ -36,6 +41,7 @@ public class ObservabilityTestClient {
   private static final Logger logger = Logger.getLogger(ObservabilityTestClient.class.getName());
 
   private final TestServiceGrpc.TestServiceBlockingStub blockingStub;
+  private final TestServiceGrpc.TestServiceStub asyncStub;
 
   /** Construct client for accessing HelloWorld server using the existing channel. */
   public ObservabilityTestClient(Channel channel) {
@@ -44,6 +50,46 @@ public class ObservabilityTestClient {
 
     // Passing Channels to code makes code easier to test and makes it easier to reuse Channels.
     blockingStub = TestServiceGrpc.newBlockingStub(channel);
+    asyncStub = TestServiceGrpc.newStub(channel);
+  }
+
+  public void doFullDuplexCall() throws InterruptedException {
+    final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(5);
+    StreamObserver<StreamingOutputCallRequest> requestObserver
+        = asyncStub.fullDuplexCall(new StreamObserver<StreamingOutputCallResponse>() {
+            @Override
+            public void onNext(StreamingOutputCallResponse response) {
+              logger.info("fullDuplexCall client receives request size " +
+                  response.getPayload().getBody().size());
+              queue.add(response);
+            }
+            @Override
+            public void onError(Throwable t) {
+              logger.info("fullDuplexCall client receives onError");
+              System.out.println(t);
+              queue.add(t);
+            }
+            @Override
+            public void onCompleted() {
+              logger.info("fullDuplexCall client receives completed");
+              queue.add("Completed");
+            }
+          });
+
+    final StreamingOutputCallRequest request = StreamingOutputCallRequest.newBuilder()
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(314159))
+        .setPayload(Payload.newBuilder()
+            .setBody(ByteString.copyFrom(new byte[271828])))
+        .build();
+    for (int i = 0; i < 5; i++) {
+      requestObserver.onNext(request);
+      Object actualResponse = queue.poll(5000, TimeUnit.MILLISECONDS);
+      if (actualResponse instanceof Throwable) {
+        throw new AssertionError(actualResponse);
+      }
+    }
+    requestObserver.onCompleted();
+    logger.info("Final value in queue: "+queue.poll(5000, TimeUnit.MILLISECONDS));
   }
 
   public void doUnaryCall() {
@@ -94,6 +140,11 @@ public class ObservabilityTestClient {
     try {
       ObservabilityTestClient client = new ObservabilityTestClient(channel);
       client.doUnaryCall();
+      try {
+        client.doFullDuplexCall();
+      } catch (InterruptedException e) {
+        throw new AssertionError(e);
+      }
     } finally {
       // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
       // resources the channel should be shut down when it will no longer be used. If it may be used
