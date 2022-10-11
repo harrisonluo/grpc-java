@@ -16,7 +16,7 @@
 set -ex
 cd "$(dirname "$0")"/../..
 
-IMAGENAME=o11y-testing-java
+IMAGENAME=grpc-observability/integration-testing/linux/java
 TAG=1.50.0-dev
 PROJECTID=`gcloud config get-value project`
 
