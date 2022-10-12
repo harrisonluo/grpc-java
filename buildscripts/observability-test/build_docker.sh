@@ -16,7 +16,14 @@
 set -ex
 cd "$(dirname "$0")"/../..
 
-IMAGENAME=grpc-observability/integration-testing/linux/java
+JOB_MODE=$1
+
+if [ $JOB_MODE = "prod" ] ; then
+  IMAGENAME=grpc-observability/integration-testing/linux/java
+else # "dev"
+  IMAGENAME=grpc-observability/integration-testing/linux-dev/java
+fi
+
 TAG=1.50.0-dev
 PROJECTID=`gcloud config get-value project`
 
