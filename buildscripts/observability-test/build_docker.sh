@@ -16,6 +16,10 @@
 set -ex
 cd "$(dirname "$0")"/../..
 
+# Environment Variables:
+#
+# JOB_MODE: 'integration' for stable or 'integration-dev' for adhoc experimental
+#
 JOB_MODE=$1
 
 IMAGENAME=grpc-observability/testing/${JOB_MODE}-java
