@@ -112,18 +112,23 @@ public class ObservabilityTestClient {
     // Access a service running on the local machine on port 10000
     String target = "localhost:10000";
     int exportInterval = 0;
+    String action = "doUnaryCall";
     // Allow passing in the user and target strings as command line arguments
     if (args.length > 0) {
       if ("--help".equals(args[0])) {
-        System.err.println("Usage: [target [exportInterval]]");
+        System.err.println("Usage: [target [exportInterval [action]]]");
         System.err.println("");
         System.err.println("  target  The server to connect to. Defaults to " + target);
         System.err.println("  exportInterval  Number of seconds to wait for exporting observability data. Defaults to " + exportInterval);
+        System.err.println("  action  The action to perform. Defaults to " + action);
         System.exit(1);
       }
       target = args[0];
       if (args.length > 1) {
         exportInterval = Integer.parseInt(args[1]);
+      }
+      if (args.length > 2) {
+        action = args[2];
       }
     }
 
@@ -139,11 +144,14 @@ public class ObservabilityTestClient {
         .build();
     try {
       ObservabilityTestClient client = new ObservabilityTestClient(channel);
-      client.doUnaryCall();
-      try {
-        client.doFullDuplexCall();
-      } catch (InterruptedException e) {
-        throw new AssertionError(e);
+      if (action == "doFullDuplexCall") {
+        try {
+          client.doFullDuplexCall();
+        } catch (InterruptedException e) {
+          throw new AssertionError(e);
+        }
+      } else { // "doUnaryCall"
+        client.doUnaryCall();
       }
     } finally {
       // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
