@@ -18,14 +18,17 @@ package io.grpc.testing.integration;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.protobuf.ByteString;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.gcp.observability.GcpObservability;
+import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.integration.Messages.Payload;
 import io.grpc.testing.integration.Messages.ResponseParameters;
@@ -40,8 +43,8 @@ import io.grpc.testing.integration.Messages.StreamingOutputCallResponse;
 public class ObservabilityTestClient {
   private static final Logger logger = Logger.getLogger(ObservabilityTestClient.class.getName());
 
-  private final TestServiceGrpc.TestServiceBlockingStub blockingStub;
-  private final TestServiceGrpc.TestServiceStub asyncStub;
+  private TestServiceGrpc.TestServiceBlockingStub blockingStub;
+  private TestServiceGrpc.TestServiceStub asyncStub;
 
   /** Construct client for accessing HelloWorld server using the existing channel. */
   public ObservabilityTestClient(Channel channel) {
@@ -93,6 +96,8 @@ public class ObservabilityTestClient {
   }
 
   public void doUnaryCall() {
+    final byte[] trailingBytes =
+        {(byte) 0xa, (byte) 0xb, (byte) 0xa, (byte) 0xb, (byte) 0xa, (byte) 0xb};
     final SimpleRequest request = SimpleRequest.newBuilder()
         .setResponseSize(314159)
         .setPayload(Payload.newBuilder()
@@ -100,6 +105,14 @@ public class ObservabilityTestClient {
         .build();
     SimpleResponse response;
     try {
+      Metadata metadata = new Metadata();
+      metadata.put(ObservabilityTestUtil.RPC_METADATA_KEY, "o11y-header-value");
+      metadata.put(ObservabilityTestUtil.RPC_METADATA_BIN_KEY, trailingBytes);
+      AtomicReference<Metadata> headersCapture = new AtomicReference<>();
+      AtomicReference<Metadata> trailersCapture = new AtomicReference<>();
+      blockingStub = blockingStub.withInterceptors(
+          MetadataUtils.newAttachHeadersInterceptor(metadata),
+          MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture));
       response = blockingStub.unaryCall(request);
     } catch (StatusRuntimeException e) {
       logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
@@ -144,7 +157,7 @@ public class ObservabilityTestClient {
         .build();
     try {
       ObservabilityTestClient client = new ObservabilityTestClient(channel);
-      if (action == "doFullDuplexCall") {
+      if (action.equals("doFullDuplexCall")) {
         try {
           client.doFullDuplexCall();
         } catch (InterruptedException e) {
