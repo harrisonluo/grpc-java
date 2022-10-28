@@ -39,9 +39,8 @@ public class ObservabilityTestServer {
 
   private Server server;
 
-  private void start() throws IOException {
+  private void start(int port) throws IOException {
     /* The port on which the server should run */
-    int port = 10000;
     server = ServerBuilder.forPort(port)
              .addService(new TestServiceImpl())
         .build()
@@ -82,9 +81,13 @@ public class ObservabilityTestServer {
    * Main launches the server from the command line.
    */
   public static void main(String[] args) throws IOException, InterruptedException {
+    int port = 10000;
+    if (args.length > 0) {
+      port = Integer.parseInt(args[0]);
+    }
     try (GcpObservability gcpObservability = GcpObservability.grpcInit()) {
       final ObservabilityTestServer server = new ObservabilityTestServer();
-      server.start();
+      server.start(port);
       server.blockUntilShutdown();
     }
   }
