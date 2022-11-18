@@ -176,7 +176,7 @@ public class ObservabilityTestClient {
     logger.info("calling observability.close() after "+exportInterval+"s sleep");
     int ss = exportInterval;
     while (ss > 0) {
-      int next = Math.min(ss, 5);
+      int next = Math.min(ss, 15);
       Thread.sleep(TimeUnit.MILLISECONDS.convert(next, TimeUnit.SECONDS));
       ss = ss - next;
       logger.info(ss+"s more to sleep");
