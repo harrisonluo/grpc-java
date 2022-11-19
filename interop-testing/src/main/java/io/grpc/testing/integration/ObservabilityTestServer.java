@@ -17,12 +17,15 @@
 package io.grpc.testing.integration;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import com.google.protobuf.ByteString;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.gcp.observability.GcpObservability;
+import io.grpc.services.MetricRecorder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.integration.Messages.Payload;
 import io.grpc.testing.integration.Messages.ResponseParameters;
@@ -30,6 +33,7 @@ import io.grpc.testing.integration.Messages.SimpleRequest;
 import io.grpc.testing.integration.Messages.SimpleResponse;
 import io.grpc.testing.integration.Messages.StreamingOutputCallRequest;
 import io.grpc.testing.integration.Messages.StreamingOutputCallResponse;
+import io.grpc.testing.integration.TestServiceImpl;
 
 /**
  * Server that manages startup/shutdown of a {@code TestService} server.
@@ -41,8 +45,10 @@ public class ObservabilityTestServer {
 
   private void start(int port) throws IOException {
     /* The port on which the server should run */
+    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    MetricRecorder metricRecorder = MetricRecorder.newInstance();
     server = ServerBuilder.forPort(port)
-             .addService(new TestServiceImpl())
+             .addService(new TestServiceImpl(executor, metricRecorder))
         .build()
         .start();
     logger.info("Server started, listening on " + port);
@@ -89,50 +95,6 @@ public class ObservabilityTestServer {
       final ObservabilityTestServer server = new ObservabilityTestServer();
       server.start(port);
       server.blockUntilShutdown();
-    }
-  }
-
-  static class TestServiceImpl extends TestServiceGrpc.TestServiceImplBase {
-    @Override
-    public void emptyCall(
-        EmptyProtos.Empty req, StreamObserver<EmptyProtos.Empty> responseObserver) {
-      responseObserver.onNext(EmptyProtos.Empty.getDefaultInstance());
-      responseObserver.onCompleted();
-    }
-
-    @Override
-    public void unaryCall(SimpleRequest req, StreamObserver<SimpleResponse> responseObserver) {
-      logger.info("unaryCall server receives request size "+req.getPayload().getBody().size());
-      responseObserver.onNext(
-          SimpleResponse.newBuilder().setPayload(
-              Payload.newBuilder().setBody(
-                  ByteString.copyFrom(new byte[req.getResponseSize()]))).build());
-      responseObserver.onCompleted();
-    }
-
-    @Override
-    public StreamObserver<StreamingOutputCallRequest> fullDuplexCall(
-        final StreamObserver<StreamingOutputCallResponse> responseObserver) {
-      return new StreamObserver<StreamingOutputCallRequest>() {
-        @Override
-        public void onNext(StreamingOutputCallRequest req) {
-          logger.info("fullDuplexCall server receives request size "+req.getPayload().getBody().size());
-          for (ResponseParameters params : req.getResponseParametersList()) {
-            responseObserver.onNext(StreamingOutputCallResponse.newBuilder().setPayload(
-                Payload.newBuilder().setBody(
-                    ByteString.copyFrom(new byte[params.getSize()]))).build());
-          }
-        }
-        @Override
-        public void onError(Throwable t) {
-          logger.info("fullDuplexCall server onError");
-          responseObserver.onError(t);
-        }
-        @Override
-        public void onCompleted() {
-          responseObserver.onCompleted();
-        }
-      };
     }
   }
 }
