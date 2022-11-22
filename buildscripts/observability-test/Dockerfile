@@ -14,10 +14,9 @@
 
 FROM openjdk:11
 
-WORKDIR /grpc-java/interop-testing/build/install/grpc-interop-testing/bin
+WORKDIR /grpc-java/interop-testing/build
 
-COPY ./interop-testing/build/install/grpc-interop-testing/bin/observability-test-server .
-COPY ./interop-testing/build/install/grpc-interop-testing/bin/observability-test-client .
+COPY ./interop-testing/build/. .
 
 WORKDIR /grpc-java
 
