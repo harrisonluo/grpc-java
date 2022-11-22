@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:11
+FROM openjdk:11.0.16-jdk-slim-bullseye
 
 WORKDIR /grpc-java/interop-testing/build
 
