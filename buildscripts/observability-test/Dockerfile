@@ -14,16 +14,11 @@
 
 FROM openjdk:11
 
-WORKDIR /grpc-java
+WORKDIR /grpc-java/interop-testing/build/install/grpc-interop-testing/bin
 
-COPY . .
-
-WORKDIR /grpc-java/interop-testing
-
-RUN ../gradlew installDist -x test -PskipCodegen=true -PskipAndroid=true
+COPY ./interop-testing/build/install/grpc-interop-testing/bin/observability-test-server .
+COPY ./interop-testing/build/install/grpc-interop-testing/bin/observability-test-client .
 
 WORKDIR /grpc-java
-
-EXPOSE 10000
 
 CMD ["/bin/sleep","inf"]

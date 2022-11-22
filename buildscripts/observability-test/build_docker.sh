@@ -18,18 +18,9 @@ cd "$(dirname "$0")"/../..
 
 # Environment Variables:
 #
-# JOB_MODE: 'integration' for stable or 'integration-dev' for adhoc experimental
+# TAG_NAME: the docker image tag name
 #
-JOB_MODE=$1
 
-IMAGENAME=grpc-observability/testing/${JOB_MODE}-java
-TAG=1.50.0-dev
-PROJECTID=`gcloud config get-value project`
+echo Building ${TAG_NAME}
 
-echo Building ${IMAGENAME}:${TAG}
-
-docker build --no-cache -t o11y/${IMAGENAME}:${TAG} -f ./buildscripts/observability-test/Dockerfile .
-
-docker tag o11y/${IMAGENAME}:${TAG} gcr.io/${PROJECTID}/${IMAGENAME}:${TAG}
-
-docker push gcr.io/${PROJECTID}/${IMAGENAME}:${TAG}
+docker build --no-cache -t ${TAG_NAME} -f ./buildscripts/observability-test/Dockerfile .
