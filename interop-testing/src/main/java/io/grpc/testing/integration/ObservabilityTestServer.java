@@ -47,7 +47,6 @@ public class ObservabilityTestServer {
     /* The port on which the server should run */
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     MetricRecorder metricRecorder = MetricRecorder.newInstance();
-    logger.info("Re-using existing TestServiceImpl");
     server = ServerBuilder.forPort(port)
              .addService(new TestServiceImpl(executor, metricRecorder))
         .build()
