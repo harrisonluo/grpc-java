@@ -164,11 +164,6 @@ public class ObservabilityTestClient {
           } catch (InterruptedException e) {
             throw new AssertionError(e);
           }
-        } else if (action.equals("do20UnaryCall")) {
-          for (int i = 0; i < 20; i++) {
-            client.doUnaryCall();
-            Thread.sleep(TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS));
-          }
         } else { // "doUnaryCall"
           client.doUnaryCall();
         }
