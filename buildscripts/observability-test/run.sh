@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2022 gRPC authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:11.0.16-jdk-slim-bullseye
+set -ex
+cd "$(dirname "$0")"/../..
 
-WORKDIR /grpc-java/interop-testing/build
+if [ "$1" = "server" ] ; then
+  /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/observability-test-server $2
 
-COPY ./interop-testing/build/. .
+elif [ "$1" = "client" ] ; then
+  /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/observability-test-client $2:$3 $4 $5
 
-WORKDIR /grpc-java
-
-COPY ./buildscripts/observability-test/run.sh .
-
-ENTRYPOINT ["/grpc-java/run.sh"]
+else
+  echo "Invalid action $1"
+  exit 1
+fi
