@@ -57,7 +57,7 @@ public class ObservabilityTestClient {
   }
 
   public void doFullDuplexCall() throws InterruptedException {
-    final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(5);
+    final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(4);
     StreamObserver<StreamingOutputCallRequest> requestObserver
         = asyncStub.fullDuplexCall(new StreamObserver<StreamingOutputCallResponse>() {
             @Override
@@ -84,7 +84,7 @@ public class ObservabilityTestClient {
         .setPayload(Payload.newBuilder()
             .setBody(ByteString.copyFrom(new byte[271828])))
         .build();
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 4; i++) {
       requestObserver.onNext(request);
       Object actualResponse = queue.poll(5000, TimeUnit.MILLISECONDS);
       if (actualResponse instanceof Throwable) {
