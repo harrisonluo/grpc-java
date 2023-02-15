@@ -14,12 +14,10 @@
 
 FROM openjdk:11.0.16-jdk-slim-bullseye
 
-WORKDIR /grpc-java/interop-testing/build
-
-COPY ./interop-testing/build/. .
-
 WORKDIR /grpc-java
 
-COPY ./buildscripts/observability-test/run.sh .
+COPY . .
 
-ENTRYPOINT ["/grpc-java/run.sh"]
+RUN ./gradlew installDist -x test -PskipCodegen=true -PskipAndroid=true
+
+ENTRYPOINT ["/grpc-java/buildscripts/observability-test/run.sh"]
