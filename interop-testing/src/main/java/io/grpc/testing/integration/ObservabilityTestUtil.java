@@ -24,8 +24,8 @@ import io.grpc.Metadata;
 public class ObservabilityTestUtil {
 
   public static final Metadata.Key<String> RPC_METADATA_KEY
-      = Metadata.Key.of("x-grpc-test-echo-initial", Metadata.ASCII_STRING_MARSHALLER);
+      = Metadata.Key.of("o11y-header", Metadata.ASCII_STRING_MARSHALLER);
   public static final Metadata.Key<byte[]> RPC_METADATA_BIN_KEY
-      = Metadata.Key.of("x-grpc-test-echo-trailing-bin", Metadata.BINARY_BYTE_MARSHALLER);
+      = Metadata.Key.of("o11y-header-bin", Metadata.BINARY_BYTE_MARSHALLER);
 
 }
