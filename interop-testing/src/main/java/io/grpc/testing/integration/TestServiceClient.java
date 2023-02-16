@@ -31,6 +31,7 @@ import io.grpc.TlsChannelCredentials;
 import io.grpc.alts.AltsChannelCredentials;
 import io.grpc.alts.ComputeEngineChannelCredentials;
 import io.grpc.alts.GoogleDefaultChannelCredentials;
+import io.grpc.gcp.observability.GcpObservability;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.internal.JsonParser;
 import io.grpc.internal.testing.TestUtils;
@@ -60,6 +61,7 @@ public class TestServiceClient {
   public static void main(String[] args) throws Exception {
     // Let Netty or OkHttp use Conscrypt if it is available.
     TestUtils.installConscryptIfAvailable();
+    GcpObservability observability = GcpObservability.grpcInit();
     final TestServiceClient client = new TestServiceClient();
     client.parseArgs(args);
     customBackendMetricsLoadBalancerProvider = new CustomBackendMetricsLoadBalancerProvider();
@@ -71,6 +73,9 @@ public class TestServiceClient {
     } finally {
       client.tearDown();
     }
+    System.out.println("Sleeping 90 seconds");
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(90, TimeUnit.SECONDS));
+    observability.close();
     System.exit(0);
   }
 
