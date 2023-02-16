@@ -26,6 +26,7 @@ import io.grpc.ServerCredentials;
 import io.grpc.ServerInterceptors;
 import io.grpc.TlsServerCredentials;
 import io.grpc.alts.AltsServerCredentials;
+import io.grpc.gcp.observability.GcpObservability;
 import io.grpc.internal.testing.TestUtils;
 import io.grpc.services.MetricRecorder;
 import io.grpc.xds.orca.OrcaMetricReportingServerInterceptor;
@@ -63,9 +64,11 @@ public class TestServiceServer {
                 }
               }
             });
-    server.start();
-    System.out.println("Server started on port " + server.port);
-    server.blockUntilShutdown();
+    try (GcpObservability gcpObservability = GcpObservability.grpcInit()) {
+      server.start();
+      System.out.println("Server started on port " + server.port);
+      server.blockUntilShutdown();
+    }
   }
 
   private int port = 8080;
