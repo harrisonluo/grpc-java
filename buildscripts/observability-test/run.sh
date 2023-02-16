@@ -17,7 +17,7 @@ set -ex
 cd "$(dirname "$0")"/../..
 
 if [ "$1" = "server" ] ; then
-  /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-server --port=$2
+  /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-server --port=$2 --use_tls=false
 
 elif [ "$1" = "client" ] ; then
   /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/observability-test-client $2:$3 $4 $5
