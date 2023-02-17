@@ -16,8 +16,21 @@
 set -ex
 cd "$(dirname "$0")"/../..
 
+# TODO(stanleycheung): replace positional parameters with explicit parameters
+#
+# $1: server | client
+#
+# For server: $2: server_port
+#
+# For client: $2: server_host
+#             $3: server_port
+#             $4: observability_exporter_sleep_seconds
+#             $5: action
+
+
 if [ "$1" = "server" ] ; then
-  /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-server --port=$2 --use_tls=false
+  /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-server \
+    --port=$2 --use_tls=false
 
 elif [ "$1" = "client" ] ; then
   /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-client \
