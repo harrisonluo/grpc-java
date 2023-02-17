@@ -21,7 +21,8 @@ if [ "$1" = "server" ] ; then
 
 elif [ "$1" = "client" ] ; then
   /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-client \
-    --server_host=$2 --server_port=$3 --use_tls=false --test_case=$5
+    --server_host=$2 --server_port=$3 --use_tls=false \
+    --observability_exporter_sleep_seconds=$4 --test_case=$5
 
 else
   echo "Invalid action $1"
