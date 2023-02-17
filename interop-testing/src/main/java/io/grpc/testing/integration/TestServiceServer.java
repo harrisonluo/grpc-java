@@ -59,16 +59,20 @@ public class TestServiceServer {
                 try {
                   System.out.println("Shutting down");
                   server.stop();
+                  if (server.enableObservability) {
+                    server.gcpObservability.close();
+                  }
                 } catch (Exception e) {
                   e.printStackTrace();
                 }
               }
             });
-    try (GcpObservability gcpObservability = GcpObservability.grpcInit()) {
-      server.start();
-      System.out.println("Server started on port " + server.port);
-      server.blockUntilShutdown();
+    if (server.enableObservability) {
+      server.gcpObservability = GcpObservability.grpcInit();
     }
+    server.start();
+    System.out.println("Server started on port " + server.port);
+    server.blockUntilShutdown();
   }
 
   private int port = 8080;
@@ -78,6 +82,8 @@ public class TestServiceServer {
   private ScheduledExecutorService executor;
   private Server server;
   private int localHandshakerPort = -1;
+  private boolean enableObservability = false;
+  private GcpObservability gcpObservability = null;
 
   @VisibleForTesting
   void parseArgs(String[] args) {
@@ -135,6 +141,9 @@ public class TestServiceServer {
               + "\n  --local_handshaker_port=PORT"
               + "\n                        Use local ALTS handshaker service on the specified port "
               + "\n                        for testing. Only effective when --use_alts=true."
+              + "\n  --enable_observability=true|false "
+              + "\n                        Whether to enable GCP Observability. Default: "
+              + s.enableObservability
       );
       System.exit(1);
     }

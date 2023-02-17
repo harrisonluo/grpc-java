@@ -30,12 +30,13 @@ cd "$(dirname "$0")"/../..
 
 if [ "$1" = "server" ] ; then
   /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-server \
-    --port=$2 --use_tls=false
+    --use_tls=false --enable_observability=true \
+    --port=$2
 
 elif [ "$1" = "client" ] ; then
   /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-client \
-    --server_host=$2 --server_port=$3 \
     --use_tls=false --enable_observability=true \
+    --server_host=$2 --server_port=$3 \
     --observability_exporter_sleep_seconds=$4 --test_case=$5
 
 else

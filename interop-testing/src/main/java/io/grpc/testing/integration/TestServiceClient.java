@@ -64,9 +64,9 @@ public class TestServiceClient {
     TestUtils.installConscryptIfAvailable();
     final TestServiceClient client = new TestServiceClient();
     client.parseArgs(args);
-    GcpObservability observability = null;
+    GcpObservability gcpObservability = null;
     if (enableObservability) {
-      observability = GcpObservability.grpcInit();
+      gcpObservability = GcpObservability.grpcInit();
     }
     customBackendMetricsLoadBalancerProvider = new CustomBackendMetricsLoadBalancerProvider();
     LoadBalancerRegistry.getDefaultRegistry().register(customBackendMetricsLoadBalancerProvider);
@@ -80,7 +80,7 @@ public class TestServiceClient {
     if (enableObservability) {
       System.out.println("Sleeping "+observabilityExporterSleepSeconds+" seconds before exiting");
       Thread.sleep(TimeUnit.MILLISECONDS.convert(observabilityExporterSleepSeconds, TimeUnit.SECONDS));
-      observability.close();
+      gcpObservability.close();
     }
     System.exit(0);
   }
