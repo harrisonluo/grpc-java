@@ -62,12 +62,12 @@ public class TestServiceClient {
   public static void main(String[] args) throws Exception {
     // Let Netty or OkHttp use Conscrypt if it is available.
     TestUtils.installConscryptIfAvailable();
+    final TestServiceClient client = new TestServiceClient();
+    client.parseArgs(args);
     GcpObservability observability = null;
     if (enableObservability) {
       observability = GcpObservability.grpcInit();
     }
-    final TestServiceClient client = new TestServiceClient();
-    client.parseArgs(args);
     customBackendMetricsLoadBalancerProvider = new CustomBackendMetricsLoadBalancerProvider();
     LoadBalancerRegistry.getDefaultRegistry().register(customBackendMetricsLoadBalancerProvider);
     client.setUp();
