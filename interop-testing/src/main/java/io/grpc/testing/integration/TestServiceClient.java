@@ -73,8 +73,8 @@ public class TestServiceClient {
     } finally {
       client.tearDown();
     }
-    System.out.println("Sleeping 90 seconds");
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(90, TimeUnit.SECONDS));
+    System.out.println("Sleeping "+observabilityExporterSleepSeconds+" seconds");
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(observabilityExporterSleepSeconds, TimeUnit.SECONDS));
     observability.close();
     System.exit(0);
   }
@@ -102,6 +102,7 @@ public class TestServiceClient {
   private int soakOverallTimeoutSeconds =
       soakIterations * soakPerIterationMaxAcceptableLatencyMs / 1000;
   private static LoadBalancerProvider customBackendMetricsLoadBalancerProvider;
+  private static int observabilityExporterSleepSeconds = 0;
 
   private Tester tester = new Tester();
 
@@ -176,6 +177,8 @@ public class TestServiceClient {
         soakMinTimeMsBetweenRpcs = Integer.parseInt(value);
       } else if ("soak_overall_timeout_seconds".equals(key)) {
         soakOverallTimeoutSeconds = Integer.parseInt(value);
+      } else if ("observability_exporter_sleep_seconds".equals(key)) {
+        observabilityExporterSleepSeconds = Integer.parseInt(value);
       } else {
         System.err.println("Unknown argument: " + key);
         usage = true;
@@ -244,6 +247,10 @@ public class TestServiceClient {
           + "\n                              should stop and fail, if the desired number of "
           + "\n                              iterations have not yet completed. Default "
             + c.soakOverallTimeoutSeconds
+          + "\n --observability_exporter_sleep_seconds "
+          + "\n                              The number of seconds to wait before the client exits. "
+          + "\n                              Default: "
+          + TestServiceClient.observabilityExporterSleepSeconds
       );
       System.exit(1);
     }
