@@ -120,6 +120,8 @@ public class TestServiceServer {
           usage = true;
           break;
         }
+      } else if ("enable_observability".equals(key)) {
+        enableObservability = true;
       } else {
         System.err.println("Unknown argument: " + key);
         usage = true;
