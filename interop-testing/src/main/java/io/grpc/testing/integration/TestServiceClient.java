@@ -278,7 +278,14 @@ public class TestServiceClient {
   private void run() {
     System.out.println("Running test " + testCase);
     try {
-      runTest(TestCases.fromString(testCase));
+      if (testCase.contains(",")) {
+        String[] testCases = testCase.split(",");
+        for (String singleCase : testCases) {
+          runTest(TestCases.fromString(singleCase));
+        }
+      } else {
+        runTest(TestCases.fromString(testCase));
+      }
     } catch (RuntimeException ex) {
       throw ex;
     } catch (Exception ex) {
