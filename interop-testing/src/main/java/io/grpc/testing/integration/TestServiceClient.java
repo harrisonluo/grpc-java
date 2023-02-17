@@ -259,6 +259,8 @@ public class TestServiceClient {
           + "\n --enable_observability=true|false "
           + "                                Whether to enable GCP Observability. Default "
             + TestServiceClient.enableObservability
+          // TODO(stanleycheung): remove this param once all the observability exporter plugins
+          //                      are able to flush observability data to cloud at shutdown
           + "\n --observability_exporter_sleep_seconds "
           + "\n                              The number of seconds to wait before the client exits. "
           + "\n                              Default: "
