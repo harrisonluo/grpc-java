@@ -25,8 +25,7 @@ cd "$(dirname "$0")"/../..
 # For client: $2: server_host
 #             $3: server_port
 #             $4: observability_exporter_sleep_seconds
-#             $5: action
-
+#             $5: test_case
 
 if [ "$1" = "server" ] ; then
   /grpc-java/interop-testing/build/install/grpc-interop-testing/bin/test-server \
